@@ -1,0 +1,43 @@
+# Enable CORS for development
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type"
+
+# Redirect index.html to index.htm
+RewriteEngine On
+RewriteRule ^index\.html$ index.htm [L,R=301]
+
+# Handle subdirectory URLs
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.htm [L]
+
+# Fix script paths
+RewriteRule ^index\.html/(.*)$ /cctv/$1 [L,R=301]
+
+# Handle 404 errors
+ErrorDocument 404 /cctv/index.htm
+
+# Set correct MIME types
+AddType application/javascript .js
+AddType text/html .htm .html
+AddType text/css .css
+
+# Force correct MIME types
+<FilesMatch "\.js$">
+    Header set Content-Type "application/javascript; charset=UTF-8"
+    Header set X-Content-Type-Options "nosniff"
+</FilesMatch>
+
+<FilesMatch "\.css$">
+    Header set Content-Type "text/css; charset=UTF-8"
+    Header set X-Content-Type-Options "nosniff"
+</FilesMatch>
+
+<FilesMatch "\.(htm|html)$">
+    Header set Content-Type "text/html; charset=UTF-8"
+    Header set X-Content-Type-Options "nosniff"
+</FilesMatch>
+
+# Disable MIME type sniffing
+Header set X-Content-Type-Options "nosniff"
