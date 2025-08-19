@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Planner - ทดสอบการค้นหา</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 300px; }
+        .search-result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+        .notification { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            padding: 15px; 
+            border-radius: 5px; 
+            color: white; 
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .notification.success { background-color: #28a745; }
+        .notification.error { background-color: #dc3545; }
+        .notification.warning { background-color: #ffc107; color: #212529; }
+        .notification.info { background-color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <h1>CCTV Planner - ทดสอบการค้นหา</h1>
+    
+    <div class="test-section info">
+        <h3>ข้อมูลการทดสอบ</h3>
+        <p><strong>URL ปัจจุบัน:</strong> <span id="currentUrl"></span></p>
+        <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการค้นหาด้วย OpenStreetMap Nominatim</h3>
+        <div>
+            <input type="text" id="searchInput" placeholder="เช่น CentralWorld, ถนน พระราม 9, สนามบินดอนเมือง..." />
+            <button onclick="testSearch()">ทดสอบค้นหา</button>
+            <button onclick="testSearchAPI()">ทดสอบ API โดยตรง</button>
+        </div>
+        <div id="searchResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบคำค้นหาที่แนะนำ</h3>
+        <div>
+            <button onclick="testSearchTerm('CentralWorld')">CentralWorld</button>
+            <button onclick="testSearchTerm('ถนน พระราม 9')">ถนน พระราม 9</button>
+            <button onclick="testSearchTerm('สนามบินดอนเมือง')">สนามบินดอนเมือง</button>
+            <button onclick="testSearchTerm('MBK Center')">MBK Center</button>
+            <button onclick="testSearchTerm('สยามพารากอน')">สยามพารากอน</button>
+            <button onclick="testSearchTerm('Terminal 21')">Terminal 21</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการเชื่อมต่อ API</h3>
+        <button onclick="testAPIConnection()">ทดสอบการเชื่อมต่อ Nominatim API</button>
+        <div id="apiTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการค้นหาแบบ Batch</h3>
+        <button onclick="runBatchSearch()">รันการทดสอบทั้งหมด</button>
+        <div id="batchResult"></div>
+    </div>
+
+    <div class="test-section warning">
+        <h3>คำแนะนำการค้นหา</h3>
+        <ul>
+            <li>ใช้ชื่อสถานที่ที่ชัดเจน เช่น "CentralWorld", "MBK Center"</li>
+            <li>ใช้ชื่อถนนพร้อมเขต เช่น "ถนน พระราม 9, หัวหมาก"</li>
+            <li>ใช้ชื่อสถานที่สำคัญ เช่น "สนามบินดอนเมือง", "สถานีรถไฟฟ้า"</li>
+            <li>หากไม่พบผลลัพธ์ ลองใช้คำค้นหาที่สั้นลง</li>
+        </ul>
+    </div>
+
+    <script>
+        // แสดงข้อมูลพื้นฐาน
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+
+        // ฟังก์ชันแสดง notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // ทดสอบการค้นหา
+        function testSearch() {
+            const input = document.getElementById('searchInput');
+            const query = input.value.trim();
+            
+            if (!query) {
+                showNotification('กรุณาใส่คำค้นหา', 'warning');
+                return;
+            }
+            
+            showNotification('กำลังค้นหา...', 'info');
+            performSearch(query);
+        }
+
+        // ทดสอบคำค้นหาที่แนะนำ
+        function testSearchTerm(term) {
+            document.getElementById('searchInput').value = term;
+            showNotification(`กำลังค้นหา: ${term}`, 'info');
+            performSearch(term);
+        }
+
+        // ฟังก์ชันค้นหาหลัก
+        function performSearch(query) {
+            const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=th&limit=3&addressdetails=1`;
+            
+            fetch(searchUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const resultDiv = document.getElementById('searchResult');
+                    
+                    if (data && data.length > 0) {
+                        let html = '<div class="success"><h4>ผลการค้นหา:</h4>';
+                        
+                        data.forEach((result, index) => {
+                            const lat = parseFloat(result.lat);
+                            const lon = parseFloat(result.lon);
+                            
+                            html += `
+                                <div class="search-result">
+                                    <strong>${index + 1}. ${result.display_name}</strong><br>
+                                    <small>พิกัด: ${lat}, ${lon}</small><br>
+                                    <small>ประเภท: ${result.type || 'ไม่ระบุ'}</small>
+                                    ${result.address ? `
+                                        <br><small>
+                                            ${result.address.road ? `ถนน: ${result.address.road}<br>` : ''}
+                                            ${result.address.suburb ? `แขวง: ${result.address.suburb}<br>` : ''}
+                                            ${result.address.district ? `เขต: ${result.address.district}<br>` : ''}
+                                            ${result.address.city ? `จังหวัด: ${result.address.city}` : ''}
+                                        </small>
+                                    ` : ''}
+                                </div>
+                            `;
+                        });
+                        
+                        html += '</div>';
+                        resultDiv.innerHTML = html;
+                        showNotification(`พบ ${data.length} ผลลัพธ์`, 'success');
+                    } else {
+                        resultDiv.innerHTML = '<div class="error"><p>ไม่พบตำแหน่งที่ค้นหา</p></div>';
+                        showNotification('ไม่พบตำแหน่งที่ค้นหา', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    document.getElementById('searchResult').innerHTML = `
+                        <div class="error">
+                            <p>เกิดข้อผิดพลาด: ${error.message}</p>
+                        </div>
+                    `;
+                    showNotification('ไม่สามารถค้นหาตำแหน่งได้', 'error');
+                });
+        }
+
+        // ทดสอบ API โดยตรง
+        function testSearchAPI() {
+            const input = document.getElementById('searchInput');
+            const query = input.value.trim();
+            
+            if (!query) {
+                showNotification('กรุณาใส่คำค้นหา', 'warning');
+                return;
+            }
+            
+            const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=th&limit=1`;
+            
+            showNotification('กำลังทดสอบ API...', 'info');
+            
+            fetch(searchUrl)
+                .then(response => {
+                    const resultDiv = document.getElementById('searchResult');
+                    resultDiv.innerHTML = `
+                        <div class="info">
+                            <h4>ผลการทดสอบ API:</h4>
+                            <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                            <p><strong>URL:</strong> ${searchUrl}</p>
+                            <p><strong>Headers:</strong></p>
+                            <pre>${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}</pre>
+                        </div>
+                    `;
+                    
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                })
+                .then(data => {
+                    const resultDiv = document.getElementById('searchResult');
+                    resultDiv.innerHTML += `
+                        <div class="success">
+                            <h4>ข้อมูลที่ได้รับ:</h4>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                    showNotification('ทดสอบ API สำเร็จ', 'success');
+                })
+                .catch(error => {
+                    console.error('API test error:', error);
+                    showNotification(`ทดสอบ API ล้มเหลว: ${error.message}`, 'error');
+                });
+        }
+
+        // ทดสอบการเชื่อมต่อ API
+        function testAPIConnection() {
+            const resultDiv = document.getElementById('apiTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ...</p>';
+            
+            const testUrl = 'https://nominatim.openstreetmap.org/search?format=json&q=Bangkok&countrycodes=th&limit=1';
+            
+            fetch(testUrl)
+                .then(response => {
+                    const status = response.status;
+                    const contentType = response.headers.get('content-type');
+                    
+                    if (status === 200 && contentType && contentType.includes('application/json')) {
+                        resultDiv.innerHTML = `
+                            <div class="success">
+                                <p>✅ การเชื่อมต่อ API สำเร็จ</p>
+                                <p><strong>Status:</strong> ${status}</p>
+                                <p><strong>Content-Type:</strong> ${contentType}</p>
+                            </div>
+                        `;
+                        showNotification('การเชื่อมต่อ API สำเร็จ', 'success');
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="error">
+                                <p>❌ การเชื่อมต่อ API ล้มเหลว</p>
+                                <p><strong>Status:</strong> ${status}</p>
+                                <p><strong>Content-Type:</strong> ${contentType || 'ไม่ระบุ'}</p>
+                            </div>
+                        `;
+                        showNotification('การเชื่อมต่อ API ล้มเหลว', 'error');
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <p>❌ เกิดข้อผิดพลาด: ${error.message}</p>
+                        </div>
+                    `;
+                    showNotification(`เกิดข้อผิดพลาด: ${error.message}`, 'error');
+                });
+        }
+
+        // ทดสอบแบบ Batch
+        function runBatchSearch() {
+            const testTerms = [
+                'CentralWorld',
+                'ถนน พระราม 9',
+                'สนามบินดอนเมือง',
+                'MBK Center',
+                'สยามพารากอน'
+            ];
+            
+            const resultDiv = document.getElementById('batchResult');
+            resultDiv.innerHTML = '<p>กำลังรันการทดสอบทั้งหมด...</p>';
+            
+            let results = [];
+            let completed = 0;
+            
+            testTerms.forEach((term, index) => {
+                setTimeout(() => {
+                    const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(term)}&countrycodes=th&limit=1`;
+                    
+                    fetch(searchUrl)
+                        .then(response => response.json())
+                        .then(data => {
+                            const success = data && data.length > 0;
+                            results.push({
+                                term: term,
+                                success: success,
+                                result: success ? data[0].display_name : 'ไม่พบ'
+                            });
+                            
+                            completed++;
+                            
+                            if (completed === testTerms.length) {
+                                let html = '<div class="info"><h4>ผลการทดสอบทั้งหมด:</h4>';
+                                results.forEach(result => {
+                                    const status = result.success ? '✅' : '❌';
+                                    html += `<p>${status} ${result.term}: ${result.result}</p>`;
+                                });
+                                html += '</div>';
+                                resultDiv.innerHTML = html;
+                                showNotification('การทดสอบทั้งหมดเสร็จสิ้น', 'success');
+                            }
+                        })
+                        .catch(error => {
+                            results.push({
+                                term: term,
+                                success: false,
+                                result: `เกิดข้อผิดพลาด: ${error.message}`
+                            });
+                            
+                            completed++;
+                            
+                            if (completed === testTerms.length) {
+                                let html = '<div class="info"><h4>ผลการทดสอบทั้งหมด:</h4>';
+                                results.forEach(result => {
+                                    const status = result.success ? '✅' : '❌';
+                                    html += `<p>${status} ${result.term}: ${result.result}</p>`;
+                                });
+                                html += '</div>';
+                                resultDiv.innerHTML = html;
+                                showNotification('การทดสอบทั้งหมดเสร็จสิ้น', 'info');
+                            }
+                        });
+                }, index * 1000); // รันทีละ 1 วินาที
+            });
+        }
+
+        // รันการทดสอบเมื่อโหลดหน้า
+        window.onload = function() {
+            setTimeout(testAPIConnection, 1000);
+        };
+
+        // เพิ่ม event listener สำหรับ Enter key
+        document.getElementById('searchInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                testSearch();
+            }
+        });
+    </script>
+</body>
+</html>

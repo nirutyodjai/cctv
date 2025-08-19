@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Planner - ทดสอบการแก้ไขปัญหา</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .notification { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            padding: 15px; 
+            border-radius: 5px; 
+            color: white; 
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .notification.success { background-color: #28a745; }
+        .notification.error { background-color: #dc3545; }
+        .notification.warning { background-color: #ffc107; color: #212529; }
+        .notification.info { background-color: #17a2b8; }
+        .error-log { 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6; 
+            border-radius: 3px; 
+            padding: 10px; 
+            margin: 10px 0; 
+            font-family: monospace; 
+            font-size: 12px; 
+            max-height: 200px; 
+            overflow-y: auto; 
+        }
+    </style>
+</head>
+<body>
+    <h1>CCTV Planner - ทดสอบการแก้ไขปัญหา</h1>
+    
+    <div class="test-section info">
+        <h3>ข้อมูลการทดสอบ</h3>
+        <p><strong>URL ปัจจุบัน:</strong> <span id="currentUrl"></span></p>
+        <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+        <p><strong>เวลา:</strong> <span id="currentTime"></span></p>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการโหลดไฟล์หลัก</h3>
+        <button onclick="testMainFiles()">ทดสอบไฟล์หลัก</button>
+        <button onclick="testLibraries()">ทดสอบ Libraries</button>
+        <div id="fileTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการทำงานของ Map</h3>
+        <button onclick="testMapFunctionality()">ทดสอบ Map</button>
+        <button onclick="testControls()">ทดสอบ Controls</button>
+        <div id="mapTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการค้นหา</h3>
+        <button onclick="testSearchFunction()">ทดสอบการค้นหา</button>
+        <div id="searchTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการทำงานของ Features</h3>
+        <button onclick="testFeatures()">ทดสอบ Features</button>
+        <div id="featuresTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>ตรวจสอบ Console Errors</h3>
+        <button onclick="checkConsoleErrors()">ตรวจสอบ Errors</button>
+        <div id="errorLog"></div>
+    </div>
+
+    <div class="test-section warning">
+        <h3>ปัญหาที่แก้ไขแล้ว</h3>
+        <ul>
+            <li>✅ <strong>Control.js error</strong>: แก้ไขการสร้าง Leaflet Control</li>
+            <li>✅ <strong>Socket.IO 404 errors</strong>: ปิดการใช้งาน Collaboration ชั่วคราว</li>
+            <li>✅ <strong>การค้นหา</strong>: ปรับปรุงฟังก์ชันการค้นหา</li>
+            <li>✅ <strong>MIME Type errors</strong>: แก้ไขการตั้งค่า Server</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h3>ลิงก์ไปยังไฟล์ทดสอบอื่นๆ</h3>
+        <p><a href="test-mime.html" target="_blank">ทดสอบ MIME Type</a></p>
+        <p><a href="test-url.html" target="_blank">ทดสอบ URL</a></p>
+        <p><a href="test-search.html" target="_blank">ทดสอบการค้นหา</a></p>
+        <p><a href="index.htm" target="_blank">หน้าหลัก CCTV Planner</a></p>
+    </div>
+
+    <script>
+        // แสดงข้อมูลพื้นฐาน
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('currentTime').textContent = new Date().toLocaleString('th-TH');
+
+        // ฟังก์ชันแสดง notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // ทดสอบไฟล์หลัก
+        function testMainFiles() {
+            const resultDiv = document.getElementById('fileTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ...</p>';
+            
+            const files = [
+                { name: 'index.htm', url: './index.htm' },
+                { name: 'cctv.js', url: './cctv.js' },
+                { name: 'collaborative.js', url: './collaborative.js' }
+            ];
+            
+            let results = [];
+            
+            files.forEach(file => {
+                fetch(file.url)
+                    .then(response => {
+                        const status = response.status;
+                        const contentType = response.headers.get('content-type');
+                        
+                        if (status === 200) {
+                            results.push(`✅ ${file.name}: สำเร็จ (${status}, ${contentType})`);
+                        } else {
+                            results.push(`❌ ${file.name}: ล้มเหลว (${status})`);
+                        }
+                        
+                        if (results.length === files.length) {
+                            resultDiv.innerHTML = `
+                                <div class="success">
+                                    <h4>ผลการทดสอบไฟล์หลัก:</h4>
+                                    ${results.map(r => `<p>${r}</p>`).join('')}
+                                </div>
+                            `;
+                            showNotification('ทดสอบไฟล์หลักเสร็จสิ้น', 'success');
+                        }
+                    })
+                    .catch(error => {
+                        results.push(`❌ ${file.name}: เกิดข้อผิดพลาด (${error.message})`);
+                        
+                        if (results.length === files.length) {
+                            resultDiv.innerHTML = `
+                                <div class="error">
+                                    <h4>ผลการทดสอบไฟล์หลัก:</h4>
+                                    ${results.map(r => `<p>${r}</p>`).join('')}
+                                </div>
+                            `;
+                            showNotification('ทดสอบไฟล์หลักเสร็จสิ้น', 'error');
+                        }
+                    });
+            });
+        }
+
+        // ทดสอบ Libraries
+        function testLibraries() {
+            const resultDiv = document.getElementById('fileTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ Libraries...</p>';
+            
+            const libraries = [
+                { name: 'Leaflet', test: () => typeof L !== 'undefined' },
+                { name: 'Bootstrap', test: () => typeof bootstrap !== 'undefined' },
+                { name: 'Font Awesome', test: () => typeof FontAwesome !== 'undefined' || document.querySelector('.fas') !== null },
+                { name: 'html2canvas', test: () => typeof html2canvas !== 'undefined' }
+            ];
+            
+            let results = [];
+            
+            libraries.forEach(lib => {
+                try {
+                    const success = lib.test();
+                    results.push(`${success ? '✅' : '❌'} ${lib.name}: ${success ? 'โหลดสำเร็จ' : 'ไม่พบ'}`);
+                } catch (error) {
+                    results.push(`❌ ${lib.name}: เกิดข้อผิดพลาด (${error.message})`);
+                }
+            });
+            
+            resultDiv.innerHTML = `
+                <div class="info">
+                    <h4>ผลการทดสอบ Libraries:</h4>
+                    ${results.map(r => `<p>${r}</p>`).join('')}
+                </div>
+            `;
+            showNotification('ทดสอบ Libraries เสร็จสิ้น', 'info');
+        }
+
+        // ทดสอบ Map Functionality
+        function testMapFunctionality() {
+            const resultDiv = document.getElementById('mapTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ Map Functionality...</p>';
+            
+            const tests = [
+                { name: 'Leaflet Object', test: () => typeof L !== 'undefined' },
+                { name: 'Map Container', test: () => document.getElementById('map') !== null },
+                { name: 'Map Controls', test: () => document.querySelector('.leaflet-control') !== null }
+            ];
+            
+            let results = [];
+            
+            tests.forEach(test => {
+                try {
+                    const success = test.test();
+                    results.push(`${success ? '✅' : '❌'} ${test.name}: ${success ? 'ทำงานได้' : 'ไม่ทำงาน'}`);
+                } catch (error) {
+                    results.push(`❌ ${test.name}: เกิดข้อผิดพลาด (${error.message})`);
+                }
+            });
+            
+            resultDiv.innerHTML = `
+                <div class="info">
+                    <h4>ผลการทดสอบ Map Functionality:</h4>
+                    ${results.map(r => `<p>${r}</p>`).join('')}
+                </div>
+            `;
+            showNotification('ทดสอบ Map Functionality เสร็จสิ้น', 'info');
+        }
+
+        // ทดสอบ Controls
+        function testControls() {
+            const resultDiv = document.getElementById('mapTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ Controls...</p>';
+            
+            const controls = [
+                { name: 'ปุ่มลบสายทั้งหมด', selector: '.leaflet-control a[title="ลบสายทั้งหมด"]' },
+                { name: 'ปุ่มค้นหา', selector: '#placesSearchBtn' },
+                { name: 'ปุ่มเพิ่มกล้อง', selector: '#addCamera' },
+                { name: 'ปุ่มเพิ่ม Rack', selector: '#addRack' }
+            ];
+            
+            let results = [];
+            
+            controls.forEach(control => {
+                const element = document.querySelector(control.selector);
+                const success = element !== null;
+                results.push(`${success ? '✅' : '❌'} ${control.name}: ${success ? 'พบ' : 'ไม่พบ'}`);
+            });
+            
+            resultDiv.innerHTML = `
+                <div class="info">
+                    <h4>ผลการทดสอบ Controls:</h4>
+                    ${results.map(r => `<p>${r}</p>`).join('')}
+                </div>
+            `;
+            showNotification('ทดสอบ Controls เสร็จสิ้น', 'info');
+        }
+
+        // ทดสอบการค้นหา
+        function testSearchFunction() {
+            const resultDiv = document.getElementById('searchTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบการค้นหา...</p>';
+            
+            const tests = [
+                { name: 'ฟังก์ชัน performSearchQuery', test: () => typeof performSearchQuery === 'function' },
+                { name: 'Input ค้นหา', test: () => document.getElementById('placesSearch') !== null },
+                { name: 'ปุ่มค้นหา', test: () => document.getElementById('placesSearchBtn') !== null }
+            ];
+            
+            let results = [];
+            
+            tests.forEach(test => {
+                try {
+                    const success = test.test();
+                    results.push(`${success ? '✅' : '❌'} ${test.name}: ${success ? 'ทำงานได้' : 'ไม่ทำงาน'}`);
+                } catch (error) {
+                    results.push(`❌ ${test.name}: เกิดข้อผิดพลาด (${error.message})`);
+                }
+            });
+            
+            resultDiv.innerHTML = `
+                <div class="info">
+                    <h4>ผลการทดสอบการค้นหา:</h4>
+                    ${results.map(r => `<p>${r}</p>`).join('')}
+                </div>
+            `;
+            showNotification('ทดสอบการค้นหาเสร็จสิ้น', 'info');
+        }
+
+        // ทดสอบ Features
+        function testFeatures() {
+            const resultDiv = document.getElementById('featuresTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ Features...</p>';
+            
+            const features = [
+                { name: 'บันทึกโปรเจค', selector: '#saveProject' },
+                { name: 'โหลดโปรเจค', selector: '#loadProject' },
+                { name: 'ปริ้นแผนที่', selector: '#printMap' },
+                { name: 'ส่งออกรูปภาพ', selector: '#exportImage' },
+                { name: 'เพิ่มข้อความตำแหน่ง', selector: '#addLocationText' }
+            ];
+            
+            let results = [];
+            
+            features.forEach(feature => {
+                const element = document.querySelector(feature.selector);
+                const success = element !== null;
+                results.push(`${success ? '✅' : '❌'} ${feature.name}: ${success ? 'พบ' : 'ไม่พบ'}`);
+            });
+            
+            resultDiv.innerHTML = `
+                <div class="info">
+                    <h4>ผลการทดสอบ Features:</h4>
+                    ${results.map(r => `<p>${r}</p>`).join('')}
+                </div>
+            `;
+            showNotification('ทดสอบ Features เสร็จสิ้น', 'info');
+        }
+
+        // ตรวจสอบ Console Errors
+        function checkConsoleErrors() {
+            const resultDiv = document.getElementById('errorLog');
+            resultDiv.innerHTML = '<p>กำลังตรวจสอบ Console Errors...</p>';
+            
+            // เก็บ errors ที่เกิดขึ้น
+            const errors = [];
+            const originalError = console.error;
+            const originalWarn = console.warn;
+            
+            console.error = function(...args) {
+                errors.push(`ERROR: ${args.join(' ')}`);
+                originalError.apply(console, args);
+            };
+            
+            console.warn = function(...args) {
+                errors.push(`WARNING: ${args.join(' ')}`);
+                originalWarn.apply(console, args);
+            };
+            
+            // รอสักครู่แล้วแสดงผล
+            setTimeout(() => {
+                if (errors.length > 0) {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>พบ Console Errors/Warnings:</h4>
+                            <div class="error-log">
+                                ${errors.map(error => `<div>${error}</div>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                    showNotification(`พบ ${errors.length} errors/warnings`, 'warning');
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>ไม่พบ Console Errors/Warnings</h4>
+                            <p>ระบบทำงานได้ปกติ</p>
+                        </div>
+                    `;
+                    showNotification('ไม่พบ Console Errors', 'success');
+                }
+                
+                // คืนค่า console functions
+                console.error = originalError;
+                console.warn = originalWarn;
+            }, 2000);
+        }
+
+        // รันการทดสอบทั้งหมดเมื่อโหลดหน้า
+        window.onload = function() {
+            setTimeout(() => {
+                testMainFiles();
+                setTimeout(() => testLibraries(), 2000);
+                setTimeout(() => testMapFunctionality(), 4000);
+                setTimeout(() => testControls(), 6000);
+                setTimeout(() => testSearchFunction(), 8000);
+                setTimeout(() => testFeatures(), 10000);
+                setTimeout(() => checkConsoleErrors(), 12000);
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

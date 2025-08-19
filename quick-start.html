@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Planner - เริ่มต้นใช้งาน</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .step h3 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .step p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .tips {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .tips h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+
+        .tips ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .tips li {
+            padding: 5px 0;
+            color: #333;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .tips li::before {
+            content: '💡';
+            position: absolute;
+            left: 0;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+
+        .navigation h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 CCTV Planner</h1>
+            <p>เริ่มต้นใช้งานอย่างรวดเร็ว</p>
+        </div>
+
+        <div class="step">
+            <h3>
+                <span class="step-number">1</span>
+                เลือกวิธีเริ่มต้น
+            </h3>
+            <p>คุณสามารถเลือกวิธีเริ่มต้นใช้งานได้ 2 วิธี:</p>
+            <div class="action-buttons">
+                <a href="menu-redesign.html" class="btn btn-primary">📋 ใช้เมนูใหม่ (แนะนำ)</a>
+                <a href="index.htm" class="btn btn-secondary">🎯 เข้าสู่หน้าหลักโดยตรง</a>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>
+                <span class="step-number">2</span>
+                เพิ่มกล้องลงแผนที่
+            </h3>
+            <p>เมื่อเข้าสู่หน้าหลักแล้ว:</p>
+                         <ol style="margin-left: 20px; color: #555;">
+                 <li>คลิกปุ่ม "เพิ่มกล้องบูลเล็ต", "เพิ่มกล้องโดม" หรือ "เพิ่มกล้อง PTZ"</li>
+                 <li>คลิกที่แผนที่เพื่อวางกล้อง</li>
+                 <li>ปรับแต่งการตั้งค่ากล้องในแผงควบคุมด้านขวา</li>
+             </ol>
+        </div>
+
+        <div class="step">
+            <h3>
+                <span class="step-number">3</span>
+                ปรับมุมกล้อง
+            </h3>
+            <p>ทดสอบฟีเจอร์การหมุนกล้อง:</p>
+            <div class="action-buttons">
+                <a href="test-camera-rotation.html" class="btn btn-primary">🔄 ทดสอบการหมุนกล้อง</a>
+            </div>
+            <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
+                💡 <strong>เคล็ดลับ:</strong> ลากจุดสีน้ำเงินเพื่อหมุนกล้อง หรือใช้ปุ่มหมุนในแผงควบคุม
+            </p>
+        </div>
+
+        <div class="tips">
+            <h3>💡 เคล็ดลับการใช้งาน</h3>
+            <ul>
+                <li><strong>การย้ายกล้อง:</strong> ลากจุดสีแดงเพื่อย้ายตำแหน่งกล้อง</li>
+                <li><strong>การหมุนกล้อง:</strong> ลากจุดสีน้ำเงินเพื่อหมุนกล้อง</li>
+                <li><strong>การค้นหาสถานที่:</strong> ใช้ช่องค้นหาด้านบนเพื่อซูมไปยังตำแหน่งที่ต้องการ</li>
+                <li><strong>การบันทึกโปรเจค:</strong> ใช้ปุ่ม "บันทึกโปรเจค" เพื่อเก็บงานไว้ใช้ภายหลัง</li>
+                <li><strong>การลบกล้อง:</strong> คลิกที่กล้องแล้วกดปุ่ม "ลบ" ใน popup</li>
+            </ul>
+        </div>
+
+        <div class="navigation">
+            <h3>🔗 การนำทาง</h3>
+            <div class="nav-buttons">
+                <a href="menu-redesign.html" class="btn btn-primary">📋 เมนูหลัก</a>
+                <a href="test-fixes-v2.html" class="btn btn-secondary">🔧 ทดสอบระบบ</a>
+                <a href="test-search.html" class="btn btn-secondary">🔍 ทดสอบการค้นหา</a>
+                <a href="README.md" class="btn btn-secondary">📖 คู่มือการใช้งาน</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // เพิ่ม animation เมื่อโหลดหน้า
+        document.addEventListener('DOMContentLoaded', function() {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((step, index) => {
+                step.style.opacity = '0';
+                step.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    step.style.transition = 'all 0.5s ease';
+                    step.style.opacity = '1';
+                    step.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

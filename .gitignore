@@ -1,0 +1,8 @@
+# Ignore local configuration files that contain API keys
+config.local.js
+config.production.js
+
+# Ignore any other sensitive files
+*.key
+*.pem
+.env

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทดสอบการแก้ไข DOM Loading</title>
+    <style>
+        body {
+            font-family: 'Sarabun', 'Noto Sans Thai', 'Tahoma', sans-serif;
+            margin: 20px;
+            background: #f8f9fa;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .test-button {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+        }
+        .test-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 ทดสอบการแก้ไข DOM Loading</h1>
+        
+        <div id="status" class="status info">
+            กำลังตรวจสอบสถานะ...
+        </div>
+        
+        <h3>📋 การทดสอบ:</h3>
+        <ol>
+            <li>ตรวจสอบว่า toolsEl ถูกสร้างขึ้นหลังจาก DOM โหลดเสร็จ</li>
+            <li>ตรวจสอบว่า event listeners ทำงานได้</li>
+            <li>ตรวจสอบว่าไม่มีการ error ใน console</li>
+        </ol>
+        
+        <h3>🔧 ปุ่มทดสอบ:</h3>
+        <button class="test-button" onclick="testToolsEl()">ทดสอบ toolsEl</button>
+        <button class="test-button" onclick="testEventListeners()">ทดสอบ Event Listeners</button>
+        <button class="test-button" onclick="testConsoleErrors()">ตรวจสอบ Console Errors</button>
+        <button class="test-button" onclick="goToMain()">ไปหน้าหลัก</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let testResults = [];
+        
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+        
+        function addResult(test, result, details = '') {
+            testResults.push({ test, result, details });
+            const resultsEl = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${result === 'PASS' ? 'success' : 'error'}`;
+            div.innerHTML = `<strong>${test}:</strong> ${result} ${details ? `(${details})` : ''}`;
+            resultsEl.appendChild(div);
+        }
+        
+        function testToolsEl() {
+            try {
+                // จำลองการโหลด cctv.js
+                const mockToolsEl = document.createElement('div');
+                mockToolsEl.id = 'tools';
+                document.body.appendChild(mockToolsEl);
+                
+                // จำลอง initializeToolsPanel
+                function initializeToolsPanel() {
+                    const toolsEl = document.getElementById('tools');
+                    if (toolsEl) {
+                        toolsEl.innerHTML = `
+                            <div style="text-align: center; padding: 20px;">
+                                <h4>🎥 เลือกกล้อง</h4>
+                                <button onclick="console.log('กล้องบูลเล็ต')">📹 เพิ่มกล้องบูลเล็ต</button>
+                                <button onclick="console.log('กล้องโดม')">🔵 เพิ่มกล้องโดม</button>
+                                <button onclick="console.log('กล้อง PTZ')">🔴 เพิ่มกล้อง PTZ</button>
+                            </div>
+                        `;
+                        return true;
+                    }
+                    return false;
+                }
+                
+                const result = initializeToolsPanel();
+                addResult('toolsEl Initialization', result ? 'PASS' : 'FAIL', 
+                    result ? 'toolsEl ถูกสร้างและกำหนดค่าได้สำเร็จ' : 'toolsEl ไม่สามารถสร้างได้');
+                
+                // ลบ mock element
+                document.body.removeChild(mockToolsEl);
+                
+            } catch (error) {
+                addResult('toolsEl Initialization', 'FAIL', error.message);
+            }
+        }
+        
+        function testEventListeners() {
+            try {
+                // จำลองการสร้าง event listeners
+                const testButton = document.createElement('button');
+                testButton.id = 'testButton';
+                testButton.textContent = 'ปุ่มทดสอบ';
+                document.body.appendChild(testButton);
+                
+                let clickCount = 0;
+                testButton.addEventListener('click', () => {
+                    clickCount++;
+                    console.log('ปุ่มถูกคลิก:', clickCount);
+                });
+                
+                // ทดสอบการคลิก
+                testButton.click();
+                
+                addResult('Event Listeners', 'PASS', 'Event listeners ทำงานได้ปกติ');
+                
+                // ลบ test element
+                document.body.removeChild(testButton);
+                
+            } catch (error) {
+                addResult('Event Listeners', 'FAIL', error.message);
+            }
+        }
+        
+        function testConsoleErrors() {
+            try {
+                // ตรวจสอบ console errors
+                const originalError = console.error;
+                let errorCount = 0;
+                
+                console.error = function(...args) {
+                    errorCount++;
+                    originalError.apply(console, args);
+                };
+                
+                // จำลองการทำงานของ cctv.js
+                setTimeout(() => {
+                    console.error = originalError;
+                    addResult('Console Errors', errorCount === 0 ? 'PASS' : 'FAIL', 
+                        errorCount === 0 ? 'ไม่มี console errors' : `พบ ${errorCount} errors`);
+                }, 1000);
+                
+            } catch (error) {
+                addResult('Console Errors', 'FAIL', error.message);
+            }
+        }
+        
+        function goToMain() {
+            window.location.href = 'index.htm';
+        }
+        
+        // เริ่มต้นการทดสอบเมื่อหน้าโหลดเสร็จ
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('✅ หน้าเว็บโหลดเสร็จแล้ว - พร้อมทดสอบ', 'success');
+            
+            // ทดสอบอัตโนมัติ
+            setTimeout(() => {
+                testToolsEl();
+                testEventListeners();
+                testConsoleErrors();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Planner - ทดสอบ MIME Type</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>CCTV Planner - ทดสอบ MIME Type</h1>
+    
+    <div class="test-section info">
+        <h3>ข้อมูลการทดสอบ</h3>
+        <p><strong>URL ปัจจุบัน:</strong> <span id="currentUrl"></span></p>
+        <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการโหลดไฟล์ JavaScript</h3>
+        <button onclick="testLoadJS()">ทดสอบโหลด cctv.js</button>
+        <button onclick="testLoadCollaborativeJS()">ทดสอบโหลด collaborative.js</button>
+        <div id="jsTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการโหลดไฟล์ CSS</h3>
+        <button onclick="testLoadCSS()">ทดสอบโหลด CSS</button>
+        <div id="cssTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการโหลดไฟล์ HTML</h3>
+        <button onclick="testLoadHTML()">ทดสอบโหลด index.htm</button>
+        <div id="htmlTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการเชื่อมต่อ</h3>
+        <button onclick="testConnection()">ทดสอบการเชื่อมต่อ</button>
+        <div id="connectionTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>ผลการทดสอบทั้งหมด</h3>
+        <div id="allResults"></div>
+    </div>
+
+    <script>
+        // แสดงข้อมูลพื้นฐาน
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+
+        // ทดสอบการโหลด JavaScript
+        function testLoadJS() {
+            const resultDiv = document.getElementById('jsTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ...</p>';
+            
+            fetch('./cctv.js')
+                .then(response => {
+                    const contentType = response.headers.get('content-type');
+                    const status = response.status;
+                    
+                    if (status === 200 && contentType && contentType.includes('application/javascript')) {
+                        resultDiv.innerHTML = `
+                            <div class="success">
+                                <p>✅ สำเร็จ! cctv.js โหลดได้</p>
+                                <p><strong>Status:</strong> ${status}</p>
+                                <p><strong>Content-Type:</strong> ${contentType}</p>
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="error">
+                                <p>❌ ล้มเหลว! cctv.js โหลดไม่ได้</p>
+                                <p><strong>Status:</strong> ${status}</p>
+                                <p><strong>Content-Type:</strong> ${contentType || 'ไม่ระบุ'}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <p>❌ เกิดข้อผิดพลาด: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        function testLoadCollaborativeJS() {
+            const resultDiv = document.getElementById('jsTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ...</p>';
+            
+            fetch('./collaborative.js')
+                .then(response => {
+                    const contentType = response.headers.get('content-type');
+                    const status = response.status;
+                    
+                    if (status === 200 && contentType && contentType.includes('application/javascript')) {
+                        resultDiv.innerHTML = `
+                            <div class="success">
+                                <p>✅ สำเร็จ! collaborative.js โหลดได้</p>
+                                <p><strong>Status:</strong> ${status}</p>
+                                <p><strong>Content-Type:</strong> ${contentType}</p>
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="error">
+                                <p>❌ ล้มเหลว! collaborative.js โหลดไม่ได้</p>
+                                <p><strong>Status:</strong> ${status}</p>
+                                <p><strong>Content-Type:</strong> ${contentType || 'ไม่ระบุ'}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <p>❌ เกิดข้อผิดพลาด: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // ทดสอบการโหลด CSS
+        function testLoadCSS() {
+            const resultDiv = document.getElementById('cssTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ...</p>';
+            
+            fetch('./index.htm')
+                .then(response => {
+                    const contentType = response.headers.get('content-type');
+                    const status = response.status;
+                    
+                    if (status === 200 && contentType && contentType.includes('text/html')) {
+                        resultDiv.innerHTML = `
+                            <div class="success">
+                                <p>✅ สำเร็จ! index.htm โหลดได้</p>
+                                <p><strong>Status:</strong> ${status}</p>
+                                <p><strong>Content-Type:</strong> ${contentType}</p>
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="error">
+                                <p>❌ ล้มเหลว! index.htm โหลดไม่ได้</p>
+                                <p><strong>Status:</strong> ${status}</p>
+                                <p><strong>Content-Type:</strong> ${contentType || 'ไม่ระบุ'}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <p>❌ เกิดข้อผิดพลาด: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // ทดสอบการโหลด HTML
+        function testLoadHTML() {
+            const resultDiv = document.getElementById('htmlTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ...</p>';
+            
+            fetch('./index.htm')
+                .then(response => {
+                    const contentType = response.headers.get('content-type');
+                    const status = response.status;
+                    
+                    if (status === 200 && contentType && contentType.includes('text/html')) {
+                        resultDiv.innerHTML = `
+                            <div class="success">
+                                <p>✅ สำเร็จ! index.htm โหลดได้</p>
+                                <p><strong>Status:</strong> ${status}</p>
+                                <p><strong>Content-Type:</strong> ${contentType}</p>
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="error">
+                                <p>❌ ล้มเหลว! index.htm โหลดไม่ได้</p>
+                                <p><strong>Status:</strong> ${status}</p>
+                                <p><strong>Content-Type:</strong> ${contentType || 'ไม่ระบุ'}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <p>❌ เกิดข้อผิดพลาด: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // ทดสอบการเชื่อมต่อ
+        function testConnection() {
+            const resultDiv = document.getElementById('connectionTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ...</p>';
+            
+            const startTime = Date.now();
+            fetch('./index.htm')
+                .then(response => {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <p>✅ การเชื่อมต่อสำเร็จ</p>
+                            <p><strong>Response Time:</strong> ${responseTime}ms</p>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <p>❌ การเชื่อมต่อล้มเหลว: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // ทดสอบทั้งหมด
+        function runAllTests() {
+            testLoadJS();
+            setTimeout(() => testLoadCollaborativeJS(), 1000);
+            setTimeout(() => testLoadCSS(), 2000);
+            setTimeout(() => testLoadHTML(), 3000);
+            setTimeout(() => testConnection(), 4000);
+        }
+
+        // รันการทดสอบทั้งหมดเมื่อโหลดหน้า
+        window.onload = function() {
+            setTimeout(runAllTests, 1000);
+        };
+    </script>
+</body>
+</html>

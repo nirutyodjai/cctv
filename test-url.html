@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Planner - ทดสอบ URL</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .url-test { margin: 10px 0; padding: 10px; border-left: 4px solid #007bff; }
+    </style>
+</head>
+<body>
+    <h1>CCTV Planner - ทดสอบ URL</h1>
+    
+    <div class="test-section info">
+        <h3>ข้อมูล URL ปัจจุบัน</h3>
+        <p><strong>URL ปัจจุบัน:</strong> <span id="currentUrl"></span></p>
+        <p><strong>Pathname:</strong> <span id="currentPathname"></span></p>
+        <p><strong>Base URL:</strong> <span id="baseUrl"></span></p>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบ URL ที่ถูกต้อง</h3>
+        <div class="url-test">
+            <strong>✅ URL ที่ถูกต้อง:</strong><br>
+            <code>https://www.comdee.co.th/cctv/index.htm</code><br>
+            <code>https://www.comdee.co.th/cctv/</code>
+        </div>
+        <div class="url-test">
+            <strong>❌ URL ที่ผิด:</strong><br>
+            <code>https://www.comdee.co.th/cctv/index.html</code><br>
+            <code>https://www.comdee.co.th/cctv/index.html/cctv.js</code>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการโหลดไฟล์</h3>
+        <button onclick="testCorrectURLs()">ทดสอบ URL ที่ถูกต้อง</button>
+        <button onclick="testIncorrectURLs()">ทดสอบ URL ที่ผิด</button>
+        <div id="urlTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>ทดสอบการ Redirect</h3>
+        <button onclick="testRedirects()">ทดสอบการ Redirect</button>
+        <div id="redirectTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>สร้าง URL ที่ถูกต้อง</h3>
+        <button onclick="generateCorrectURLs()">สร้าง URL ที่ถูกต้อง</button>
+        <div id="generatedURLs"></div>
+    </div>
+
+    <div class="test-section warning">
+        <h3>คำแนะนำ</h3>
+        <ul>
+            <li>ใช้ <code>index.htm</code> แทน <code>index.html</code></li>
+            <li>ตรวจสอบว่าไฟล์ JavaScript อยู่ในโฟลเดอร์เดียวกัน</li>
+            <li>ใช้ relative path <code>./cctv.js</code> แทน absolute path</li>
+            <li>ตรวจสอบ server configuration (.htaccess, web.config, nginx.conf)</li>
+        </ul>
+    </div>
+
+    <script>
+        // แสดงข้อมูลพื้นฐาน
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('currentPathname').textContent = window.location.pathname;
+        document.getElementById('baseUrl').textContent = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+
+        // ทดสอบ URL ที่ถูกต้อง
+        function testCorrectURLs() {
+            const resultDiv = document.getElementById('urlTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ...</p>';
+            
+            const tests = [
+                { name: 'index.htm', url: './index.htm' },
+                { name: 'cctv.js', url: './cctv.js' },
+                { name: 'collaborative.js', url: './collaborative.js' }
+            ];
+            
+            let results = [];
+            
+            tests.forEach(test => {
+                fetch(test.url)
+                    .then(response => {
+                        const status = response.status;
+                        const contentType = response.headers.get('content-type');
+                        
+                        if (status === 200) {
+                            results.push(`✅ ${test.name}: สำเร็จ (${status}, ${contentType})`);
+                        } else {
+                            results.push(`❌ ${test.name}: ล้มเหลว (${status})`);
+                        }
+                        
+                        if (results.length === tests.length) {
+                            resultDiv.innerHTML = `
+                                <div class="success">
+                                    <h4>ผลการทดสอบ URL ที่ถูกต้อง:</h4>
+                                    ${results.map(r => `<p>${r}</p>`).join('')}
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        results.push(`❌ ${test.name}: เกิดข้อผิดพลาด (${error.message})`);
+                        
+                        if (results.length === tests.length) {
+                            resultDiv.innerHTML = `
+                                <div class="error">
+                                    <h4>ผลการทดสอบ URL ที่ถูกต้อง:</h4>
+                                    ${results.map(r => `<p>${r}</p>`).join('')}
+                                </div>
+                            `;
+                        }
+                    });
+            });
+        }
+
+        // ทดสอบ URL ที่ผิด
+        function testIncorrectURLs() {
+            const resultDiv = document.getElementById('urlTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ...</p>';
+            
+            const tests = [
+                { name: 'index.html', url: './index.html' },
+                { name: 'index.html/cctv.js', url: './index.html/cctv.js' },
+                { name: 'index.html/collaborative.js', url: './index.html/collaborative.js' }
+            ];
+            
+            let results = [];
+            
+            tests.forEach(test => {
+                fetch(test.url)
+                    .then(response => {
+                        const status = response.status;
+                        const contentType = response.headers.get('content-type');
+                        
+                        if (status === 200) {
+                            results.push(`⚠️ ${test.name}: ทำงานได้แต่ไม่แนะนำ (${status}, ${contentType})`);
+                        } else if (status === 301 || status === 302) {
+                            results.push(`🔄 ${test.name}: Redirect (${status})`);
+                        } else {
+                            results.push(`❌ ${test.name}: ล้มเหลว (${status})`);
+                        }
+                        
+                        if (results.length === tests.length) {
+                            resultDiv.innerHTML = `
+                                <div class="warning">
+                                    <h4>ผลการทดสอบ URL ที่ผิด:</h4>
+                                    ${results.map(r => `<p>${r}</p>`).join('')}
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        results.push(`❌ ${test.name}: เกิดข้อผิดพลาด (${error.message})`);
+                        
+                        if (results.length === tests.length) {
+                            resultDiv.innerHTML = `
+                                <div class="error">
+                                    <h4>ผลการทดสอบ URL ที่ผิด:</h4>
+                                    ${results.map(r => `<p>${r}</p>`).join('')}
+                                </div>
+                            `;
+                        }
+                    });
+            });
+        }
+
+        // ทดสอบการ Redirect
+        function testRedirects() {
+            const resultDiv = document.getElementById('redirectTestResult');
+            resultDiv.innerHTML = '<p>กำลังทดสอบ...</p>';
+            
+            const currentUrl = window.location.href;
+            const baseUrl = currentUrl.replace(/\/[^\/]*$/, '');
+            
+            const redirectTests = [
+                { from: baseUrl + '/index.html', to: baseUrl + '/index.htm' },
+                { from: baseUrl + '/index.html/cctv.js', to: baseUrl + '/cctv.js' }
+            ];
+            
+            let results = [];
+            
+            redirectTests.forEach(test => {
+                fetch(test.from, { method: 'HEAD', redirect: 'manual' })
+                    .then(response => {
+                        const status = response.status;
+                        const location = response.headers.get('location');
+                        
+                        if (status === 301 || status === 302) {
+                            results.push(`✅ Redirect: ${test.from} → ${location || test.to} (${status})`);
+                        } else {
+                            results.push(`❌ ไม่มี Redirect: ${test.from} (${status})`);
+                        }
+                        
+                        if (results.length === redirectTests.length) {
+                            resultDiv.innerHTML = `
+                                <div class="success">
+                                    <h4>ผลการทดสอบ Redirect:</h4>
+                                    ${results.map(r => `<p>${r}</p>`).join('')}
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        results.push(`❌ เกิดข้อผิดพลาด: ${test.from} (${error.message})`);
+                        
+                        if (results.length === redirectTests.length) {
+                            resultDiv.innerHTML = `
+                                <div class="error">
+                                    <h4>ผลการทดสอบ Redirect:</h4>
+                                    ${results.map(r => `<p>${r}</p>`).join('')}
+                                </div>
+                            `;
+                        }
+                    });
+            });
+        }
+
+        // สร้าง URL ที่ถูกต้อง
+        function generateCorrectURLs() {
+            const resultDiv = document.getElementById('generatedURLs');
+            const currentUrl = window.location.href;
+            const baseUrl = currentUrl.replace(/\/[^\/]*$/, '');
+            
+            const correctURLs = [
+                { name: 'หน้าหลัก', url: baseUrl + '/index.htm' },
+                { name: 'ไฟล์ JavaScript หลัก', url: baseUrl + '/cctv.js' },
+                { name: 'ไฟล์ Collaboration', url: baseUrl + '/collaborative.js' },
+                { name: 'ทดสอบ MIME Type', url: baseUrl + '/test-mime.html' },
+                { name: 'ทดสอบ URL', url: baseUrl + '/test-url.html' }
+            ];
+            
+            resultDiv.innerHTML = `
+                <div class="success">
+                    <h4>URL ที่ถูกต้องสำหรับการใช้งาน:</h4>
+                    ${correctURLs.map(item => `
+                        <p><strong>${item.name}:</strong> <a href="${item.url}" target="_blank">${item.url}</a></p>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // รันการทดสอบทั้งหมดเมื่อโหลดหน้า
+        window.onload = function() {
+            setTimeout(() => {
+                testCorrectURLs();
+                setTimeout(() => testIncorrectURLs(), 2000);
+                setTimeout(() => testRedirects(), 4000);
+                setTimeout(() => generateCorrectURLs(), 6000);
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

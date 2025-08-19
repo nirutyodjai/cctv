@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Planner - เมนูใหม่</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .menu-card h3 {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .menu-card .icon {
+            font-size: 2em;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #43e97b, #38f9d7);
+        }
+
+        .btn-info {
+            background: linear-gradient(45deg, #fa709a, #fee140);
+        }
+
+        .btn-dark {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            color: #333;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .features-list li {
+            padding: 5px 0;
+            color: #555;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .features-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .quick-actions h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 CCTV Planner</h1>
+            <p>เครื่องมือวางแผนระบบกล้องวงจรปิดที่ครบครัน</p>
+        </div>
+
+        <div class="quick-actions">
+            <h2>🚀 เริ่มต้นใช้งาน</h2>
+            <div class="action-buttons">
+                <a href="index.htm" class="btn">🎯 เริ่มวางแผนกล้อง</a>
+                <a href="test-camera-rotation.html" class="btn btn-secondary">🔄 ทดสอบการหมุนกล้อง</a>
+                <a href="test-fixes-v2.html" class="btn btn-success">🔧 ทดสอบระบบ</a>
+                <a href="test-search.html" class="btn btn-warning">🔍 ทดสอบการค้นหา</a>
+            </div>
+        </div>
+
+        <div class="menu-grid">
+            <div class="menu-card" onclick="window.location.href='index.htm'">
+                <h3>
+                    <span class="icon" style="background: linear-gradient(45deg, #667eea, #764ba2);">📹</span>
+                    วางแผนกล้อง
+                </h3>
+                <p>สร้างและวางแผนระบบกล้องวงจรปิดแบบครบครัน</p>
+                <ul class="features-list">
+                    <li>เพิ่มกล้อง 3 ประเภท (บูลเล็ต, โดม, PTZ)</li>
+                    <li>ปรับมุมกล้องแบบลากได้</li>
+                    <li>คำนวณพื้นที่ครอบคลุม</li>
+                    <li>ประเมินค่าใช้จ่าย</li>
+                </ul>
+                <a href="index.htm" class="btn">เริ่มใช้งาน</a>
+            </div>
+
+            <div class="menu-card" onclick="window.location.href='test-camera-rotation.html'">
+                <h3>
+                    <span class="icon" style="background: linear-gradient(45deg, #f093fb, #f5576c);">🔄</span>
+                    ทดสอบการหมุนกล้อง
+                </h3>
+                <p>ทดสอบฟีเจอร์การหมุนและปรับมุมกล้อง</p>
+                <ul class="features-list">
+                    <li>หมุนกล้องแบบลากได้</li>
+                    <li>ปุ่มหมุนเร็ว (5°, 15°, 45°, 90°)</li>
+                    <li>แสดงมุมและทิศทางแบบ real-time</li>
+                    <li>Slider ปรับมุมแบบละเอียด</li>
+                </ul>
+                <a href="test-camera-rotation.html" class="btn btn-secondary">ทดสอบ</a>
+            </div>
+
+            <div class="menu-card" onclick="window.location.href='test-fixes-v2.html'">
+                <h3>
+                    <span class="icon" style="background: linear-gradient(45deg, #4facfe, #00f2fe);">🔧</span>
+                    ทดสอบระบบ
+                </h3>
+                <p>ตรวจสอบและทดสอบการทำงานของระบบ</p>
+                <ul class="features-list">
+                    <li>ทดสอบการโหลดไฟล์</li>
+                    <li>ตรวจสอบ Libraries</li>
+                    <li>ทดสอบการทำงานของ Map</li>
+                    <li>ตรวจสอบ Console Errors</li>
+                </ul>
+                <a href="test-fixes-v2.html" class="btn btn-success">ทดสอบ</a>
+            </div>
+
+            <div class="menu-card" onclick="window.location.href='test-search.html'">
+                <h3>
+                    <span class="icon" style="background: linear-gradient(45deg, #fa709a, #fee140);">🔍</span>
+                    ทดสอบการค้นหา
+                </h3>
+                <p>ทดสอบฟีเจอร์การค้นหาสถานที่ด้วย OpenStreetMap</p>
+                <ul class="features-list">
+                    <li>ค้นหาด้วย Nominatim API</li>
+                    <li>ทดสอบคำค้นหาที่แนะนำ</li>
+                    <li>ตรวจสอบการเชื่อมต่อ API</li>
+                    <li>ทดสอบการค้นหาแบบ Batch</li>
+                </ul>
+                <a href="test-search.html" class="btn btn-warning">ทดสอบ</a>
+            </div>
+
+            <div class="menu-card" onclick="window.location.href='test-mime.html'">
+                <h3>
+                    <span class="icon" style="background: linear-gradient(45deg, #a8edea, #fed6e3); color: #333;">📋</span>
+                    ทดสอบ MIME Type
+                </h3>
+                <p>ตรวจสอบการตั้งค่า MIME Type และการโหลดไฟล์</p>
+                <ul class="features-list">
+                    <li>ทดสอบการโหลดไฟล์ JavaScript</li>
+                    <li>ตรวจสอบ Content-Type headers</li>
+                    <li>ทดสอบการโหลดไฟล์ CSS</li>
+                    <li>ตรวจสอบการตั้งค่า Server</li>
+                </ul>
+                <a href="test-mime.html" class="btn btn-dark">ทดสอบ</a>
+            </div>
+
+            <div class="menu-card" onclick="window.location.href='test-url.html'">
+                <h3>
+                    <span class="icon" style="background: linear-gradient(45deg, #ffecd2, #fcb69f); color: #333;">🌐</span>
+                    ทดสอบ URL
+                </h3>
+                <p>ทดสอบการจัดการ URL และการ redirect</p>
+                <ul class="features-list">
+                    <li>ทดสอบ URL rewriting</li>
+                    <li>ตรวจสอบการ redirect</li>
+                    <li>ทดสอบ malformed URLs</li>
+                    <li>ตรวจสอบการจัดการ path</li>
+                </ul>
+                <a href="test-url.html" class="btn btn-dark">ทดสอบ</a>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">6</div>
+                <div class="stat-label">ฟีเจอร์หลัก</div>
+            </div>
+                         <div class="stat-card">
+                 <div class="stat-number">3</div>
+                 <div class="stat-label">ประเภทกล้อง</div>
+             </div>
+            <div class="stat-card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">ฟรีใช้งาน</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">พร้อมใช้งาน</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // เพิ่ม animation เมื่อโหลดหน้า
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.menu-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+
+        // เพิ่ม hover effect สำหรับ cards
+        document.querySelectorAll('.menu-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

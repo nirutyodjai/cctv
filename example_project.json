@@ -1,0 +1,66 @@
+{
+  "cameras": [
+    {
+      "id": "cam_1",
+      "name": "กล้อง 1",
+      "latlng": [13.7563, 100.5018],
+      "fov": 90,
+      "range": 50,
+      "marker": null
+    },
+    {
+      "id": "cam_2", 
+      "name": "กล้อง 2",
+      "latlng": [13.7565, 100.5020],
+      "fov": 120,
+      "range": 30,
+      "marker": null
+    }
+  ],
+  "racks": [
+    {
+      "id": "rack_1",
+      "name": "ตู้ Rack หลัก",
+      "latlng": [13.7560, 100.5015],
+      "marker": null
+    }
+  ],
+  "rackLinks": [],
+  "rectOverlays": [
+    {
+      "id": "overlay_1",
+      "center": [13.7563, 100.5018],
+      "width": 100,
+      "height": 80,
+      "angle": 0,
+      "color": "#ff0000",
+      "opacity": 0.3,
+      "polygon": null,
+      "centerMarker": null,
+      "cornerMarkers": [],
+      "rotationHandle": null
+    }
+  ],
+  "locationTexts": [
+    {
+      "id": "text_1",
+      "text": "ตึก A ชั้น 1",
+      "latlng": [13.7563, 100.5018],
+      "marker": null
+    },
+    {
+      "id": "text_2", 
+      "text": "ห้องประชุมใหญ่",
+      "latlng": [13.7565, 100.5020],
+      "marker": null
+    }
+  ],
+  "areaPoints": [
+    [13.7560, 100.5015],
+    [13.7565, 100.5015],
+    [13.7565, 100.5020],
+    [13.7560, 100.5020]
+  ],
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "version": "1.0"
+}

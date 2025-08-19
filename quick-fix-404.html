@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Fix 404 Error</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px;
+        }
+        .fix-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #007bff;
+        }
+        .error { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 5px; }
+        .success { color: #28a745; background: #d4edda; padding: 10px; border-radius: 5px; }
+        .warning { color: #856404; background: #fff3cd; padding: 10px; border-radius: 5px; }
+        .btn {
+            padding: 12px 24px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Quick Fix 404 Error</h1>
+            <p>แก้ไขปัญหาไฟล์ไม่พบและ 404 Error</p>
+        </div>
+        
+        <div class="content">
+            <div class="fix-section">
+                <h3>🚨 สถานะปัจจุบัน</h3>
+                <div id="currentStatus" class="status warning">
+                    <span class="loading"></span>กำลังตรวจสอบ...
+                </div>
+            </div>
+
+            <div class="fix-section">
+                <h3>📁 ตรวจสอบไฟล์หลัก</h3>
+                <div id="fileStatus"></div>
+                <button class="btn btn-primary" onclick="checkMainFiles()">ตรวจสอบไฟล์ใหม่</button>
+            </div>
+
+            <div class="fix-section">
+                <h3>🌐 ตรวจสอบ URL และ Path</h3>
+                <div id="urlStatus"></div>
+                <button class="btn btn-warning" onclick="checkUrlPaths()">ตรวจสอบ URL</button>
+            </div>
+
+            <div class="fix-section">
+                <h3>🔧 แก้ไขปัญหา</h3>
+                <button class="btn btn-success" onclick="fixPathIssues()">แก้ไข Path Issues</button>
+                <button class="btn btn-warning" onclick="clearBrowserCache()">ล้าง Browser Cache</button>
+                <button class="btn btn-primary" onclick="forceReload()">โหลดหน้าใหม่</button>
+            </div>
+
+            <div class="fix-section">
+                <h3>🚀 ไปยังหน้าหลัก</h3>
+                <button class="btn btn-success" onclick="goToMainPage()">ไปหน้าหลัก (index.htm)</button>
+                <button class="btn btn-primary" onclick="goToMenuPage()">ไปหน้าเมนู (menu-redesign.html)</button>
+            </div>
+
+            <div class="fix-section">
+                <h3>📋 รายการไฟล์ที่มีอยู่</h3>
+                <div id="fileList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ตรวจสอบสถานะปัจจุบัน
+        function checkCurrentStatus() {
+            const status = document.getElementById('currentStatus');
+            const currentUrl = window.location.href;
+            
+            if (currentUrl.includes('404') || currentUrl.includes('error')) {
+                status.className = 'status error';
+                status.innerHTML = '❌ พบปัญหา 404 Error';
+            } else if (currentUrl.includes('index.html/')) {
+                status.className = 'status warning';
+                status.innerHTML = '⚠️ URL ไม่ถูกต้อง (malformed URL)';
+            } else {
+                status.className = 'status success';
+                status.innerHTML = '✅ URL ถูกต้อง';
+            }
+        }
+
+        // ตรวจสอบไฟล์หลัก
+        function checkMainFiles() {
+            const fileStatus = document.getElementById('fileStatus');
+            fileStatus.innerHTML = '<div class="loading"></span>กำลังตรวจสอบ...';
+            
+            const files = [
+                { name: 'index.htm', path: './index.htm' },
+                { name: 'cctv.js', path: './cctv.js' },
+                { name: 'collaborative.js', path: './collaborative.js' },
+                { name: 'menu-redesign.html', path: './menu-redesign.html' }
+            ];
+            
+            let results = '';
+            let checked = 0;
+            
+            files.forEach(file => {
+                fetch(file.path, { method: 'HEAD' })
+                    .then(response => {
+                        checked++;
+                        if (response.ok) {
+                            results += `<div class="success">✅ ${file.name} - พบไฟล์</div>`;
+                        } else {
+                            results += `<div class="error">❌ ${file.name} - ไม่พบไฟล์ (${response.status})</div>`;
+                        }
+                        
+                        if (checked === files.length) {
+                            fileStatus.innerHTML = results;
+                        }
+                    })
+                    .catch(error => {
+                        checked++;
+                        results += `<div class="error">❌ ${file.name} - เกิดข้อผิดพลาด: ${error.message}</div>`;
+                        
+                        if (checked === files.length) {
+                            fileStatus.innerHTML = results;
+                        }
+                    });
+            });
+        }
+
+        // ตรวจสอบ URL และ Path
+        function checkUrlPaths() {
+            const urlStatus = document.getElementById('urlStatus');
+            const currentUrl = window.location.href;
+            const pathname = window.location.pathname;
+            
+            let issues = [];
+            
+            if (pathname.includes('/index.html/')) {
+                issues.push('⚠️ Malformed URL: มี /index.html/ ใน path');
+            }
+            
+            if (pathname.includes('//')) {
+                issues.push('⚠️ Double slash ใน URL');
+            }
+            
+            if (!pathname.endsWith('.htm') && !pathname.endsWith('.html')) {
+                issues.push('⚠️ ไม่มีนามสกุลไฟล์ที่ถูกต้อง');
+            }
+            
+            let html = `
+                <div><strong>URL ปัจจุบัน:</strong> ${currentUrl}</div>
+                <div><strong>Pathname:</strong> ${pathname}</div>
+                <div><strong>Origin:</strong> ${window.location.origin}</div>
+            `;
+            
+            if (issues.length > 0) {
+                html += '<div class="warning"><strong>ปัญหาที่พบ:</strong><br>' + issues.join('<br>') + '</div>';
+            } else {
+                html += '<div class="success">✅ URL ถูกต้อง</div>';
+            }
+            
+            urlStatus.innerHTML = html;
+        }
+
+        // แก้ไข Path Issues
+        function fixPathIssues() {
+            const currentPath = window.location.pathname;
+            
+            if (currentPath.includes('/index.html/')) {
+                // แก้ไข malformed URL
+                const scriptPath = currentPath.split('/index.html/')[1];
+                const basePath = currentPath.replace('/index.html', '');
+                window.location.href = basePath + '/' + scriptPath;
+            } else if (currentPath.endsWith('/index.html')) {
+                // redirect ไป index.htm
+                window.location.href = currentPath.replace('index.html', 'index.htm');
+            } else {
+                // ไปหน้าหลัก
+                window.location.href = './index.htm';
+            }
+        }
+
+        // ล้าง Browser Cache
+        function clearBrowserCache() {
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                });
+            }
+            
+            // ล้าง localStorage และ sessionStorage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            alert('ล้าง Cache เรียบร้อยแล้ว กรุณาโหลดหน้าใหม่');
+        }
+
+        // โหลดหน้าใหม่
+        function forceReload() {
+            window.location.reload(true);
+        }
+
+        // ไปหน้าหลัก
+        function goToMainPage() {
+            window.location.href = './index.htm';
+        }
+
+        // ไปหน้าเมนู
+        function goToMenuPage() {
+            window.location.href = './menu-redesign.html';
+        }
+
+        // แสดงรายการไฟล์
+        function showFileList() {
+            const fileList = document.getElementById('fileList');
+            const files = [
+                'index.htm', 'index.html', 'cctv.js', 'collaborative.js',
+                'menu-redesign.html', 'quick-start.html', 'test-camera-rotation.html',
+                'test-fixes-v2.html', 'test-search.html', 'test-mime.html',
+                'test-url.html', 'README.md', '.htaccess', 'package.json'
+            ];
+            
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">';
+            files.forEach(file => {
+                html += `<div style="background: #e9ecef; padding: 8px; border-radius: 5px; font-size: 12px;">📄 ${file}</div>`;
+            });
+            html += '</div>';
+            
+            fileList.innerHTML = html;
+        }
+
+        // เริ่มต้น
+        window.onload = function() {
+            checkCurrentStatus();
+            checkMainFiles();
+            checkUrlPaths();
+            showFileList();
+        };
+    </script>
+</body>
+</html>

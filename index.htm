@@ -1,16 +1,533 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Planner - เครื่องมือวางแผนระบบกล้องวงจรปิด</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="https://cdn.jsdelivr.net/npm/leaflet-geometryutil@0.10.3/src/leaflet.geometryutil.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <style>
+        .location-text-marker {
+            background: transparent !important;
+            border: none !important;
+        }
+        .location-text-marker div {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            font-size: 12px;
+            max-width: 200px;
+            word-wrap: break-word;
+        }
+        @media print {
+            .btn, #tools, #calculation { display: none !important; }
+            #map { width: 100% !important; height: 100vh !important; }
+        }
+        
+        /* ไอคอนกล้องและเสา */
+        .camera-icon {
+            background: #007bff;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .ptz-icon {
+            background: #17a2b8;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .pole-icon {
+            background: #ffc107;
+            border: 2px solid #fff;
+            border-radius: 3px;
+            width: 8px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .camera-label {
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+        
+        /* Camera Controls Styles */
+        .camera-controls {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .angle-control {
+            margin-bottom: 10px;
+        }
+        
+        .angle-display {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        
+        .angle-display span:first-child {
+            color: #007bff;
+        }
+        
+        .angle-display span:last-child {
+            color: #28a745;
+        }
+        
+        .angle-buttons {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .angle-buttons button {
+            padding: 3px 8px;
+            font-size: 11px;
+            border: 1px solid #dee2e6;
+            background: #fff;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .angle-buttons button:hover {
+            background: #e9ecef;
+        }
+        
+        .leaflet-marker-icon.camera-handle {
+            cursor: grab;
+        }
+        
+        .leaflet-marker-icon.camera-handle:active {
+            cursor: grabbing;
+        }
+    </style>
 </head>
 <body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- แผนที่ -->
+            <div class="col-md-8">
+                <div id="map" style="height: 100vh;"></div>
+            </div>
+            
+            <!-- แผงควบคุม -->
+            <div class="col-md-4" style="height: 100vh; overflow-y: auto; padding: 15px;">
+                <h4><i class="fas fa-tools"></i> แผงควบคุม</h4>
+                
+                <!-- ค้นหา -->
+                <div class="mb-3">
+                    <label class="form-label">ค้นหาสถานที่:</label>
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control" placeholder="พิมพ์ชื่อสถานที่...">
+                        <button id="searchBtn" class="btn btn-outline-secondary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="form-text">พิมพ์แล้วกด Enter หรือปุ่มค้นหา เพื่อซูมไปยังตำแหน่ง</div>
+                </div>
+                
+                <!-- ปุ่มควบคุมหลัก -->
+                <div class="mb-3">
+                    <div class="d-grid gap-2">
+                        <button id="drawArea" class="btn btn-outline-secondary">
+                            <i class="fas fa-draw-polygon"></i> วาดพื้นที่งาน
+                        </button>
+                        <button id="addRack" class="btn btn-outline-dark">
+                            <i class="fas fa-server"></i> เพิ่มตู้ Rack ลงแผนที่
+                        </button>
+                        <button id="addPole" class="btn btn-outline-secondary">
+                            <i class="fas fa-flag"></i> เพิ่มเสากล้อง
+                        </button>
+                        <button id="addBulletCamera" class="btn btn-outline-warning">
+                            <i class="fas fa-video"></i> เพิ่มกล้องบูลเล็ต
+                        </button>
+                        <button id="addDomeCamera" class="btn btn-outline-primary">
+                            <i class="fas fa-circle"></i> เพิ่มกล้องโดม
+                        </button>
+                        <button id="addPTZCamera" class="btn btn-outline-info">
+                            <i class="fas fa-sync-alt"></i> เพิ่มกล้อง PTZ
+                        </button>
+                        <button id="addRectOverlay" class="btn btn-outline-secondary">
+                            <i class="fas fa-square"></i> เพิ่มกรอบสี่เหลี่ยมโปร่งแสง
+                        </button>
+                        <button id="deleteSelected" class="btn btn-outline-danger">
+                            <i class="fas fa-trash"></i> ลบวัตถุที่เลือก
+                        </button>
+                        <button id="deleteOverlay" class="btn btn-outline-warning">
+                            <i class="fas fa-square"></i> ลบสี่เหลี่ยมที่เลือก
+                        </button>
+                        <button id="deleteCamera" class="btn btn-outline-warning">
+                            <i class="fas fa-camera"></i> ลบกล้องที่เลือก
+                        </button>
+                        <button id="deleteRack" class="btn btn-outline-secondary">
+                            <i class="fas fa-server"></i> ลบตู้ Rack ที่เลือก
+                        </button>
+                        <button id="deletePole" class="btn btn-outline-secondary">
+                            <i class="fas fa-flag"></i> ลบเสากล้องที่เลือก
+                        </button>
+                        <button id="deleteAll" class="btn btn-danger">
+                            <i class="fas fa-trash-alt"></i> ลบทุกอย่าง
+                        </button>
+                    </div>
+                </div>
 
-    <div id="map" style="width: 1200px; height: 800px; float: left;"></div>
-    <div id="tools" style="width: 400px; height: 800px; float: right;"></div>
+                <!-- เมนูสายเคเบิลและท่อ -->
+                <div class="mt-3 p-2" style="border: 1px solid #28a745; border-radius: 4px; background: #f8fff9;">
+                    <label class="form-label"><i class="fas fa-network-wired"></i> <strong>ระบบสายเคเบิลและท่อ</strong></label>
+                    
+                    <!-- เลือกอุปกรณ์ต้นทางและปลายทาง -->
+                    <div class="row g-2 align-items-center mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">ต้นทาง</small>
+                            <select id="cableFrom" class="form-select form-select-sm">
+                                <option value="">เลือกอุปกรณ์</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">ปลายทาง</small>
+                            <select id="cableTo" class="form-select form-select-sm">
+                                <option value="">เลือกอุปกรณ์</option>
+                            </select>
+                        </div>
+                    </div>
 
-    <script src="cctv.js"></script>
+                    <!-- ชนิดสายเคเบิล -->
+                    <div class="row g-2 align-items-center mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">ชนิดสายเคเบิล</small>
+                            <select id="cableType" class="form-select form-select-sm">
+                                <option value="UTP" selected>UTP (สายทองแดง)</option>
+                                <option value="FIBER">Fiber (ใยแก้วนำแสง)</option>
+                                <option value="COAX">Coaxial (สายโคแอกซ์)</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">ชนิดท่อ</small>
+                            <select id="conduitType" class="form-select form-select-sm">
+                                <option value="PVC" selected>PVC (ท่อพลาสติก)</option>
+                                <option value="METAL">Metal (ท่อโลหะ)</option>
+                                <option value="FLEXIBLE">Flexible (ท่อยืดหยุ่น)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- ขนาดและความยาว -->
+                    <div class="row g-2 align-items-center mb-2">
+                        <div class="col-4">
+                            <small class="text-muted">ขนาดท่อ (นิ้ว)</small>
+                            <select id="conduitSize" class="form-select form-select-sm">
+                                <option value="0.5">0.5"</option>
+                                <option value="0.75">0.75"</option>
+                                <option value="1" selected>1"</option>
+                                <option value="1.25">1.25"</option>
+                                <option value="1.5">1.5"</option>
+                                <option value="2">2"</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">ความยาว (ม.)</small>
+                            <input type="number" id="cableLength" class="form-control form-control-sm" value="0" min="0" readonly/>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">ราคา (บาท/ม.)</small>
+                            <input type="number" id="cablePrice" class="form-control form-control-sm" value="0" min="0" readonly/>
+                        </div>
+                    </div>
+
+                    <!-- ปุ่มควบคุม -->
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button id="connectCable" class="btn btn-sm btn-success w-100">
+                                <i class="fas fa-link"></i> เชื่อมสายเคเบิล
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button id="deleteCable" class="btn btn-sm btn-danger w-100">
+                                <i class="fas fa-unlink"></i> ลบสายเคเบิล
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- แสดงรายการสายเคเบิล -->
+                    <div class="mt-2">
+                        <small class="text-muted">รายการสายเคเบิล:</small>
+                        <div id="cableList" class="border rounded p-2" style="max-height: 100px; overflow-y: auto; background: white;">
+                            <small class="text-muted">ยังไม่มีสายเคเบิล</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- เชื่อมตู้ Rack -->
+                <div class="mt-3">
+                    <label class="form-label">เชื่อมตู้ Rack เข้าหากัน:</label>
+                    <div class="row g-2 align-items-center">
+                        <div class="col-6">
+                            <select id="rackFrom" class="form-select form-select-sm">
+                                <option value="">ต้นทาง</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <select id="rackTo" class="form-select form-select-sm">
+                                <option value="">ปลายทาง</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="connectRacks" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="fas fa-project-diagram"></i> เชื่อมตู้ที่เลือก
+                    </button>
+                    <button id="deleteConnection" class="btn btn-sm btn-outline-danger mt-2">
+                        <i class="fas fa-unlink"></i> ลบการเชื่อมต่อ
+                    </button>
+                </div>
+
+                <!-- ตั้งค่ากล้อง -->
+                <div class="mt-3 p-2" style="border: 1px dashed #ddd; border-radius: 4px;">
+                    <label class="form-label"><i class="fas fa-camera"></i> ตั้งค่ากล้อง (เมื่อเลือก)</label>
+                    <div class="row g-2 align-items-center mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">ชนิดกล้อง</small>
+                            <select id="cameraType" class="form-select form-select-sm">
+                                <option value="BULLET">กล้องบูลเล็ต</option>
+                                <option value="DOME">กล้องโดม</option>
+                                <option value="PTZ">กล้อง PTZ</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">ความละเอียด</small>
+                            <select id="cameraResolution" class="form-select form-select-sm">
+                                <option value="1">1MP (720p)</option>
+                                <option value="2" selected>2MP (1080p)</option>
+                                <option value="4">4MP (1440p)</option>
+                                <option value="8">8MP (4K)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-2 align-items-center mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">มุมมอง (FOV)</small>
+                            <input type="number" id="cameraFOV" class="form-control form-control-sm" value="90" min="30" max="360"/>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">ระยะการมองเห็น (ม.)</small>
+                            <input type="number" id="cameraRange" class="form-control form-control-sm" value="50" min="10" max="500"/>
+                        </div>
+                    </div>
+                    <div class="row g-2 align-items-center mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">ความสูงเสา (ม.)</small>
+                            <input type="number" id="poleHeight" class="form-control form-control-sm" value="3" min="1" max="20"/>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">ความสูงกล้อง (ม.)</small>
+                            <input type="number" id="cameraHeight" class="form-control form-control-sm" value="2.5" min="0.5" max="10"/>
+                        </div>
+                    </div>
+                    <div class="row g-2 align-items-center mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">มุมเอียง (องศา)</small>
+                            <input type="number" id="cameraTilt" class="form-control form-control-sm" value="0" min="-90" max="90"/>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">มุมหมุน (องศา)</small>
+                            <input type="number" id="cameraPan" class="form-control form-control-sm" value="0" min="-180" max="180"/>
+                        </div>
+                    </div>
+                    <div class="row g-2 align-items-center mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">ราคากล้อง (บาท)</small>
+                            <input type="number" id="cameraPrice" class="form-control form-control-sm" value="5000" min="0"/>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">ราคาเสา (บาท)</small>
+                            <input type="number" id="polePrice" class="form-control form-control-sm" value="2000" min="0"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ข้อความตำแหน่ง -->
+                <div class="mt-3">
+                    <label class="form-label">ข้อความตำแหน่ง:</label>
+                    <div class="input-group">
+                        <input type="text" id="locationText" class="form-control" placeholder="ใส่ข้อความตำแหน่ง...">
+                        <button id="addLocationText" class="btn btn-outline-secondary">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- บันทึกและโหลด -->
+                <div class="mt-3">
+                    <div class="d-grid gap-2">
+                        <button id="saveProject" class="btn btn-success">
+                            <i class="fas fa-save"></i> บันทึกโปรเจค
+                        </button>
+                        <button id="loadProject" class="btn btn-info">
+                            <i class="fas fa-folder-open"></i> โหลดโปรเจค
+                        </button>
+                        <input type="file" id="loadProjectFile" accept=".json" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- ปริ้นและส่งออก -->
+                <div class="mt-3">
+                    <div class="d-grid gap-2">
+                        <button id="printMap" class="btn btn-warning">
+                            <i class="fas fa-print"></i> ปริ้นแผนที่
+                        </button>
+                        <button id="exportImage" class="btn btn-secondary">
+                            <i class="fas fa-image"></i> ส่งออกเป็นรูปภาพ
+                        </button>
+                    </div>
+                </div>
+
+                <!-- แผงควบคุมกล้อง -->
+                <div id="tools" class="mt-3">
+                    <!-- เนื้อหาจะถูกเติมด้วย JavaScript -->
+                </div>
+
+                <!-- การคำนวณค่าใช้จ่าย -->
+                <div id="calculation" class="mt-3 p-3" style="background: #f8f9fa; border-radius: 8px;">
+                    <h5><i class="fas fa-calculator"></i> ระบบคำนวณค่าใช้จ่าย</h5>
+                    
+                    <h4>1. กล้องและเสา</h4>
+                    <div>
+                        <label>จำนวนกล้องทั้งหมด: </label>
+                        <span id="totalCameras">0</span> ตัว
+                    </div>
+                    <div>
+                        <label>จำนวนกล้องบูลเล็ต: </label>
+                        <span id="bulletCameras">0</span> ตัว
+                    </div>
+                    <div>
+                        <label>จำนวนกล้องโดม: </label>
+                        <span id="domeCameras">0</span> ตัว
+                    </div>
+                    <div>
+                        <label>จำนวนกล้อง PTZ: </label>
+                        <span id="ptzCameras">0</span> ตัว
+                    </div>
+                    <div>
+                        <label>จำนวนเสากล้อง: </label>
+                        <span id="totalPoles">0</span> ต้น
+                    </div>
+                    <div>
+                        <label>ค่ากล้องทั้งหมด: </label>
+                        <span id="totalCameraCost">0</span> บาท
+                    </div>
+                    <div>
+                        <label>ค่าเสาทั้งหมด: </label>
+                        <span id="totalPoleCost">0</span> บาท
+                    </div>
+                    <div>
+                        <label>ค่าติดตั้งกล้อง: </label>
+                        <span id="cameraInstallationCost">0</span> บาท
+                    </div>
+                    <div>
+                        <label>ความสูงเฉลี่ย: </label>
+                        <span id="averageHeight">0</span> เมตร
+                    </div>
+                    <div>
+                        <label>ระยะการมองเห็นเฉลี่ย: </label>
+                        <span id="averageRange">0</span> เมตร
+                    </div>
+                    <div>
+                        <label>พื้นที่ครอบคลุมรวม: </label>
+                        <span id="totalCoverageArea">0</span> ตร.ม.
+                    </div>
+                    
+                    <h4>2. ตู้ Rack และอุปกรณ์</h4>
+                    <div>
+                        <label>ขนาดตู้ Rack (U): </label>
+                        <select id="rackSize" style="width: 80px;">
+                            <option value="6">6U</option>
+                            <option value="9" selected>9U</option>
+                            <option value="12">12U</option>
+                            <option value="18">18U</option>
+                            <option value="27">27U</option>
+                            <option value="42">42U</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>จำนวน Switch PoE: </label>
+                        <input type="number" id="switchQty" value="1" min="0" style="width: 60px;">
+                        <span> x 8,900 บาท</span>
+                    </div>
+                    <div>
+                        <label>จำนวน NVR: </label>
+                        <input type="number" id="nvrQty" value="1" min="0" style="width: 60px;">
+                        <span> x 15,900 บาท</span>
+                    </div>
+                    <div>
+                        <label>จำนวน UPS: </label>
+                        <input type="number" id="upsQty" value="1" min="0" style="width: 60px;">
+                        <span> x 12,500 บาท</span>
+                    </div>
+                    <div>
+                        <label>ค่าแรงติดตั้งตู้ Rack: </label>
+                        <input type="number" id="rackInstallation" value="5000" style="width: 80px;"> บาท
+                    </div>
+                    <hr>
+                    
+                    <h4>สรุปค่าใช้จ่าย</h4>
+                    <div>
+                        <strong>ค่าวัสดุ (สาย): </strong>
+                        <span id="materialCost">0</span> บาท<br>
+                        <strong>ค่าวัสดุ (ท่อ PVC): </strong>
+                        <span id="pvcCost">0</span> บาท<br>
+                        <strong>ค่าแรงเดินสาย: </strong>
+                        <span id="laborCost">0</span> บาท<br>
+                        <strong>ค่าวัสดุ (Rack และอุปกรณ์): </strong>
+                        <span id="equipmentCost">0</span> บาท<br>
+                        <strong>ค่าแรงติดตั้ง Rack: </strong>
+                        <span id="rackLaborCost">0</span> บาท<br>
+                        <strong>รวมทั้งสิ้น: </strong>
+                        <span id="totalCost">0</span> บาท
+                    </div>
+                    
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button onclick="generateQuote()" style="padding: 8px 15px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">สร้างใบเสนอราคา</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="./cctv.js"></script>
+    <script src="./collaborative.js"></script>
 
 </body>
 </html>

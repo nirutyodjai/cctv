@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test 404 Error</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f5f5f5; 
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .error { color: #dc3545; }
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+        button {
+            padding: 8px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-danger { background: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test 404 Error</h1>
+    
+    <div class="test-box">
+        <h3>📁 ตรวจสอบไฟล์</h3>
+        <div id="fileCheck">
+            <p>กำลังตรวจสอบไฟล์...</p>
+        </div>
+        <button class="btn-primary" onclick="checkFiles()">ตรวจสอบไฟล์ใหม่</button>
+    </div>
+
+    <div class="test-box">
+        <h3>🌐 ตรวจสอบ URL</h3>
+        <div id="urlCheck">
+            <p>URL ปัจจุบัน: <span id="currentUrl"></span></p>
+            <p>Base URL: <span id="baseUrl"></span></p>
+        </div>
+        <button class="btn-warning" onclick="checkUrls()">ตรวจสอบ URL ใหม่</button>
+    </div>
+
+    <div class="test-box">
+        <h3>📡 ตรวจสอบการโหลดไฟล์</h3>
+        <div id="loadCheck">
+            <p>กำลังทดสอบการโหลดไฟล์...</p>
+        </div>
+        <button class="btn-success" onclick="testFileLoading()">ทดสอบการโหลด</button>
+    </div>
+
+    <div class="test-box">
+        <h3>🔧 แก้ไขปัญหา</h3>
+        <button class="btn-primary" onclick="fixPaths()">แก้ไข Path</button>
+        <button class="btn-warning" onclick="clearCache()">ล้าง Cache</button>
+        <button class="btn-danger" onclick="goToMain()">ไปหน้าหลัก</button>
+    </div>
+
+    <script>
+        // ตรวจสอบไฟล์
+        function checkFiles() {
+            const fileCheck = document.getElementById('fileCheck');
+            fileCheck.innerHTML = '<p>กำลังตรวจสอบ...</p>';
+            
+            const files = [
+                './cctv.js',
+                './collaborative.js',
+                './index.htm',
+                './index.html'
+            ];
+            
+            let results = '';
+            let checked = 0;
+            
+            files.forEach(file => {
+                fetch(file, { method: 'HEAD' })
+                    .then(response => {
+                        checked++;
+                        if (response.ok) {
+                            results += `<p class="success">✅ ${file} - พบไฟล์</p>`;
+                        } else {
+                            results += `<p class="error">❌ ${file} - ไม่พบไฟล์ (${response.status})</p>`;
+                        }
+                        
+                        if (checked === files.length) {
+                            fileCheck.innerHTML = results;
+                        }
+                    })
+                    .catch(error => {
+                        checked++;
+                        results += `<p class="error">❌ ${file} - เกิดข้อผิดพลาด: ${error.message}</p>`;
+                        
+                        if (checked === files.length) {
+                            fileCheck.innerHTML = results;
+                        }
+                    });
+            });
+        }
+
+        // ตรวจสอบ URL
+        function checkUrls() {
+            const urlCheck = document.getElementById('urlCheck');
+            const currentUrl = window.location.href;
+            const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+            
+            document.getElementById('currentUrl').textContent = currentUrl;
+            document.getElementById('baseUrl').textContent = baseUrl;
+            
+            urlCheck.innerHTML += `
+                <p>Pathname: ${window.location.pathname}</p>
+                <p>Search: ${window.location.search}</p>
+                <p>Hash: ${window.location.hash}</p>
+            `;
+        }
+
+        // ทดสอบการโหลดไฟล์
+        function testFileLoading() {
+            const loadCheck = document.getElementById('loadCheck');
+            loadCheck.innerHTML = '<p>กำลังทดสอบ...</p>';
+            
+            // ทดสอบโหลด cctv.js
+            const script = document.createElement('script');
+            script.src = './cctv.js';
+            script.onload = () => {
+                loadCheck.innerHTML = '<p class="success">✅ โหลด cctv.js สำเร็จ</p>';
+            };
+            script.onerror = () => {
+                loadCheck.innerHTML = '<p class="error">❌ โหลด cctv.js ไม่สำเร็จ</p>';
+            };
+            document.head.appendChild(script);
+        }
+
+        // แก้ไข Path
+        function fixPaths() {
+            const currentPath = window.location.pathname;
+            if (currentPath.includes('/index.html/')) {
+                const scriptPath = currentPath.split('/index.html/')[1];
+                const basePath = currentPath.replace('/index.html', '');
+                window.location.href = basePath + '/' + scriptPath;
+            } else {
+                window.location.href = './index.htm';
+            }
+        }
+
+        // ล้าง Cache
+        function clearCache() {
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                });
+            }
+            window.location.reload(true);
+        }
+
+        // ไปหน้าหลัก
+        function goToMain() {
+            window.location.href = './index.htm';
+        }
+
+        // เริ่มต้นตรวจสอบ
+        window.onload = function() {
+            checkFiles();
+            checkUrls();
+        };
+    </script>
+</body>
+</html>
